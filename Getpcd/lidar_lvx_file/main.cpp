@@ -345,7 +345,6 @@ int main(int argc, const char *argv[]) {
   }
 
   lvx_file_handler.InitLvxFileHeader();
-  XYZpoint xyzpoint;
   int i = 0;
   steady_clock::time_point last_time = steady_clock::now();
   for (i = 0; i < lvx_file_save_time * FRAME_RATE; ++i) {
@@ -363,7 +362,17 @@ int main(int argc, const char *argv[]) {
 
     printf("Finish save %d frame to lvx file.\n", i);
     lvx_file_handler.SaveFrameToLvxFile(point_packet_list_temp);
-    xyzpoint.PrintXYZQueue();
+    while(i % 5 == 0) {
+      while (!lvx_file_handler.xyzQueue.empty()) {
+        // 获取队列头部元素
+        XYZData point = lvx_file_handler.xyzQueue.front();
+        lvx_file_handler.xyzQueue.pop();
+
+        // 调用回调函数处理发布的内容
+        
+      }
+    }
+    
   }
 
   lvx_file_handler.CloseLvxFile();

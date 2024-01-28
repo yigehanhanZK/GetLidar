@@ -3,12 +3,15 @@
 #include <cmath>
 #include <cstring>
 #include <thread>
+#include <opencv2/opencv.hpp>
+
 #include "lvx_file.h"
 #include "third_party/rapidxml/rapidxml.hpp"
 #include "third_party/rapidxml/rapidxml_utils.hpp"
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+
 
 #define WRITE_BUFFER_LEN 1024 * 1024
 #define MAGIC_CODE (0xac0ea767)
@@ -114,14 +117,7 @@ void LvxFileHandle::InitLvxFileHeader()
   lvx_file_.write((char *)write_buffer.get(), cur_offset_);
 }
 
-std::queue<XYZData> xyzQueue;
-
-void XYZpoint::EnqueueXYZData(XYZData &data)
-{
-  xyzQueue.push(data);
-}
-
-void XYZpoint::PrintXYZQueue()
+void LvxFileHandle::PrintXYZQueue()
 {
   std::queue<XYZData> tempQueue = xyzQueue;
 
@@ -132,6 +128,9 @@ void XYZpoint::PrintXYZQueue()
     std::cout << "x: " << data.x << ", y: " << data.y << ", z: " << data.z << std::endl;
   }
 }
+
+cv::Matx44d CEM; // 激光雷达到相机的外参矩阵
+cv::Matx33d CM; // 相机内参矩阵
 
 void LvxFileHandle::SaveFrameToLvxFile(std::list<LvxBasePackDetail> &point_packet_list_temp)
 {
@@ -194,6 +193,7 @@ void LvxFileHandle::SaveFrameToLvxFile(std::list<LvxBasePackDetail> &point_packe
       cur_pos_pcd += 96 * 14;
     }
   }
+
   lvx_file_.write((char *)write_buffer.get(), cur_pos);
 
   auto p = write_buffer_pcd.get();
@@ -205,7 +205,12 @@ void LvxFileHandle::SaveFrameToLvxFile(std::list<LvxBasePackDetail> &point_packe
               << (float)(((LivoxExtendRawPoint *)p)[i].z) / 1000000.f << " "
               << (int)(((LivoxExtendRawPoint *)p)[i].reflectivity) << " "
               << std::endl;
-    xyzQueue.push({(float)(((LivoxExtendRawPoint *)p)[i].x) / 1000000.f, (float)(((LivoxExtendRawPoint *)p)[i].y) / 1000000.f, (float)(((LivoxExtendRawPoint *)p)[i].z) / 1000000.f});          
+
+    float x = (float)(((LivoxExtendRawPoint *)p)[i].x) / 1000000.f;
+    float y = (float)(((LivoxExtendRawPoint *)p)[i].y) / 1000000.f;
+    float z = (float)(((LivoxExtendRawPoint *)p)[i].z) / 1000000.f;
+
+    xyzQueue.push({x, y, z});          
   }
   // pcd_file_.write((char*)write_buffer1.get(), kMaxPointSize);
   cur_offset_ = frame_header.next_offset;

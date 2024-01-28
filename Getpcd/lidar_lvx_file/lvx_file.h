@@ -81,12 +81,6 @@ typedef struct {
   float z;
 }XYZData;
 
-class XYZpoint {
-public:
-  void EnqueueXYZData(XYZData& data);
-  void PrintXYZQueue();
-};
-
 class LvxFileHandle {
 public:
   LvxFileHandle();
@@ -97,6 +91,9 @@ public:
   void SaveFrameToLvxFile(std::list<LvxBasePackDetail> &point_packet_list_temp);
   void CloseLvxFile();
   void ClosePcdFile();
+
+  void PrintXYZQueue();
+  std::queue<XYZData> xyzQueue;
 
   void AddDeviceInfo(LvxDeviceInfo &info) { device_info_list_.push_back(info); };
   int GetDeviceInfoListSize() { return device_info_list_.size(); }
