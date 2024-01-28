@@ -123,7 +123,7 @@ void LvxFileHandle::SaveFrameToLvxFile(std::list<LvxBasePackDetail> &point_packe
   std::unique_ptr<char[]> write_buffer(new char[WRITE_BUFFER_LEN]);
 
   // 再创建一个智能指针 write_buffer1
-  std::unique_ptr<char[]> write_buffer1(new char[WRITE_BUFFER_LEN]);
+  std::unique_ptr<char[]> write_buffer_pcd(new char[WRITE_BUFFER_LEN]);
 
   frame_header.current_offset = cur_offset_;
   frame_header.next_offset = cur_offset_ + sizeof(FrameHeader);
@@ -147,7 +147,7 @@ void LvxFileHandle::SaveFrameToLvxFile(std::list<LvxBasePackDetail> &point_packe
     if (cur_pos + iter.pack_size >= WRITE_BUFFER_LEN)
     {
       lvx_file_.write((char *)write_buffer.get(), cur_pos);
-      auto p = write_buffer1.get();
+      auto p = write_buffer_pcd.get();
       for (int i = 0; i < cur_pos1 / 14; i++)
       {
         pcd_file_ << (float)(((LivoxExtendRawPoint *)p)[i].x) / 1000000.f << " "
@@ -167,7 +167,7 @@ void LvxFileHandle::SaveFrameToLvxFile(std::list<LvxBasePackDetail> &point_packe
 
       // 重新复制 uint8_t raw_point[kMaxPointSize]; 数据部分
       // memcpy(write_buffer1.get() + cur_pos1, write_buffer.get() + cur_pos + 18, iter.pack_size - 18);
-      memcpy(write_buffer1.get() + cur_pos1, &(iter.raw_point), 96 * 14);
+      memcpy(write_buffer_pcd.get() + cur_pos1, &(iter.raw_point), 96 * 14);
 
       cur_pos += iter.pack_size;
       cur_pos1 += 96 * 14;
@@ -175,7 +175,7 @@ void LvxFileHandle::SaveFrameToLvxFile(std::list<LvxBasePackDetail> &point_packe
   }
   lvx_file_.write((char *)write_buffer.get(), cur_pos);
 
-  auto p = write_buffer1.get();
+  auto p = write_buffer_pcd.get();
   int i = 0;
   for (i = 0; i < cur_pos1 / 14; i++)
   {
