@@ -4,6 +4,11 @@
 #include <list>
 #include <vector>
 #include <mutex>
+#include <thread>
+#include <queue>
+#include <iostream>
+#include <string>
+#include <ctime>
 #include "livox_sdk.h"
 
 #define kMaxPointSize 1500
@@ -69,6 +74,18 @@ typedef struct {
 } FrameHeader;
 
 #pragma pack()
+
+typedef struct {
+  float x;
+  float y;
+  float z;
+}XYZData;
+
+class XYZpoint {
+public:
+  void EnqueueXYZData(XYZData& data);
+  void PrintXYZQueue();
+};
 
 class LvxFileHandle {
 public:

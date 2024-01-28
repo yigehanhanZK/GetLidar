@@ -20,12 +20,9 @@ uint8_t connected_lidar_count = 0;
 
 using namespace std::chrono;
 
-/** Connect all the broadcast device in default and connect specific device when use program options or broadcast_code_list is not empty. */
+
 std::vector<std::string> broadcast_code_list = {
-  //"000000000000001"
-  //"000000000000002",
-  //"000000000000003",
-  //"000000000000004"
+  "3GGDJ7V00100511"
 };
 
 /** Receiving error message from Livox Lidar. */
@@ -348,7 +345,7 @@ int main(int argc, const char *argv[]) {
   }
 
   lvx_file_handler.InitLvxFileHeader();
-
+  XYZpoint xyzpoint;
   int i = 0;
   steady_clock::time_point last_time = steady_clock::now();
   for (i = 0; i < lvx_file_save_time * FRAME_RATE; ++i) {
@@ -366,6 +363,7 @@ int main(int argc, const char *argv[]) {
 
     printf("Finish save %d frame to lvx file.\n", i);
     lvx_file_handler.SaveFrameToLvxFile(point_packet_list_temp);
+    xyzpoint.PrintXYZQueue();
   }
 
   lvx_file_handler.CloseLvxFile();

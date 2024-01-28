@@ -2,6 +2,7 @@
 #include <time.h>
 #include <cmath>
 #include <cstring>
+#include <thread>
 #include "lvx_file.h"
 #include "third_party/rapidxml/rapidxml.hpp"
 #include "third_party/rapidxml/rapidxml_utils.hpp"
@@ -113,6 +114,25 @@ void LvxFileHandle::InitLvxFileHeader()
   lvx_file_.write((char *)write_buffer.get(), cur_offset_);
 }
 
+std::queue<XYZData> xyzQueue;
+
+void XYZpoint::EnqueueXYZData(XYZData &data)
+{
+  xyzQueue.push(data);
+}
+
+void XYZpoint::PrintXYZQueue()
+{
+  std::queue<XYZData> tempQueue = xyzQueue;
+
+  while (!tempQueue.empty())
+  {
+    XYZData data = tempQueue.front();
+    tempQueue.pop();
+    std::cout << "x: " << data.x << ", y: " << data.y << ", z: " << data.z << std::endl;
+  }
+}
+
 void LvxFileHandle::SaveFrameToLvxFile(std::list<LvxBasePackDetail> &point_packet_list_temp)
 {
 
@@ -120,6 +140,7 @@ void LvxFileHandle::SaveFrameToLvxFile(std::list<LvxBasePackDetail> &point_packe
 
   uint64_t cur_pos_pcd = 0;
   FrameHeader frame_header = {0};
+
   std::unique_ptr<char[]> write_buffer(new char[WRITE_BUFFER_LEN]);
 
   // 再创建一个智能指针 write_buffer_pcd，用于写入pcd文件
@@ -149,7 +170,7 @@ void LvxFileHandle::SaveFrameToLvxFile(std::list<LvxBasePackDetail> &point_packe
       lvx_file_.write((char *)write_buffer.get(), cur_pos);
       auto p = write_buffer_pcd.get();
       for (int i = 0; i < cur_pos_pcd / 14; i++)
-      {
+      { 
         pcd_file_ << (float)(((LivoxExtendRawPoint *)p)[i].x) / 1000000.f << " "
                   << (float)(((LivoxExtendRawPoint *)p)[i].y) / 1000000.f << " "
                   << (float)(((LivoxExtendRawPoint *)p)[i].z) / 1000000.f << " "
@@ -184,6 +205,7 @@ void LvxFileHandle::SaveFrameToLvxFile(std::list<LvxBasePackDetail> &point_packe
               << (float)(((LivoxExtendRawPoint *)p)[i].z) / 1000000.f << " "
               << (int)(((LivoxExtendRawPoint *)p)[i].reflectivity) << " "
               << std::endl;
+    xyzQueue.push({(float)(((LivoxExtendRawPoint *)p)[i].x) / 1000000.f, (float)(((LivoxExtendRawPoint *)p)[i].y) / 1000000.f, (float)(((LivoxExtendRawPoint *)p)[i].z) / 1000000.f});          
   }
   // pcd_file_.write((char*)write_buffer1.get(), kMaxPointSize);
   cur_offset_ = frame_header.next_offset;
