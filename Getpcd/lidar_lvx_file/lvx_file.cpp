@@ -129,8 +129,11 @@ void LvxFileHandle::PrintXYZQueue()
   }
 }
 
-cv::Matx44d CEM; // 激光雷达到相机的外参矩阵
-cv::Matx33d CM; // 相机内参矩阵
+void LvxFileHandle::clear(std::queue<XYZData> q)
+{
+  std::queue<XYZData> empty;
+  std::swap(q, empty);
+}
 
 void LvxFileHandle::SaveFrameToLvxFile(std::list<LvxBasePackDetail> &point_packet_list_temp)
 {

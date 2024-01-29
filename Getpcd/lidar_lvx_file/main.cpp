@@ -364,15 +364,13 @@ int main(int argc, const char *argv[]) {
     lvx_file_handler.SaveFrameToLvxFile(point_packet_list_temp);
     while(i % 5 == 0) {
       while (!lvx_file_handler.xyzQueue.empty()) {
-        // 获取队列头部元素
         XYZData point = lvx_file_handler.xyzQueue.front();
         lvx_file_handler.xyzQueue.pop();
-
         // 调用回调函数处理发布的内容
         
       }
+      break;
     }
-    
   }
 
   lvx_file_handler.CloseLvxFile();

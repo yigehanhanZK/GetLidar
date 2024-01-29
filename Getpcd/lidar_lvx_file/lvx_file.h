@@ -94,6 +94,7 @@ public:
 
   void PrintXYZQueue();
   std::queue<XYZData> xyzQueue;
+  void clear(std::queue<XYZData> q);
 
   void AddDeviceInfo(LvxDeviceInfo &info) { device_info_list_.push_back(info); };
   int GetDeviceInfoListSize() { return device_info_list_.size(); }
