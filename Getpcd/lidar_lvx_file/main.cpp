@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <string.h>
+#include <opencv2/opencv.hpp>
 #include "lvx_file.h"
 #include "cmdline.h"
 
@@ -345,6 +346,16 @@ int main(int argc, const char *argv[]) {
   }
 
   lvx_file_handler.InitLvxFileHeader();
+
+  cv::Mat depthMap = cv::Mat::zeros(3088, 2064, CV_64F);
+
+  cv::Matx<double, 4, 4> CEM = {-0.0229838, -0.999711, -0.00707862, 0.0414193, -0.0280248,0.00772198,-0.999577,0.0776581,
+  0.999343,-0.0227757,-0.0281942,0.151931,
+  0,0,0,1 };
+  cv::Matx<double, 3, 3> CM = {3594.642004297742, 0, 1570.921444730855, 0, 3579.486376840935, 1150.355980197913, 0, 0, 1};
+
+  std::vector<XYZData> pointCloud = {};
+
   int i = 0;
   steady_clock::time_point last_time = steady_clock::now();
   for (i = 0; i < lvx_file_save_time * FRAME_RATE; ++i) {
@@ -362,14 +373,19 @@ int main(int argc, const char *argv[]) {
 
     printf("Finish save %d frame to lvx file.\n", i);
     lvx_file_handler.SaveFrameToLvxFile(point_packet_list_temp);
-    while(i % 5 == 0) {
+
+    while((i+1) % 400 == 0){
       while (!lvx_file_handler.xyzQueue.empty()) {
         XYZData point = lvx_file_handler.xyzQueue.front();
         lvx_file_handler.xyzQueue.pop();
-        // 调用回调函数处理发布的内容
-        
+        pointCloud.push_back(point);
       }
-      break;
+    lvx_file_handler.projectPointCloudToDepthMap(pointCloud, depthMap, CEM, CM);
+    cv::namedWindow("Depth Map", cv::WINDOW_NORMAL);
+    cv::resizeWindow("Depth Map", 1500, 1200);
+    cv::imshow("Depth Map", depthMap);
+    cv::waitKey(1);
+    // break;
     }
   }
 

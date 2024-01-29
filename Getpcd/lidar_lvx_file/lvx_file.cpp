@@ -129,6 +129,32 @@ void LvxFileHandle::PrintXYZQueue()
   }
 }
 
+void LvxFileHandle::projectPointCloudToDepthMap(const std::vector<XYZData>& pointCloud, cv::Mat& depthMap, cv::Matx<double, 4, 4>& CEM, cv::Matx<double, 3, 3>& CM) {
+    for (const XYZData& point : pointCloud) {
+        cv::Matx41d lidarPoint(point.x, point.y, point.z, 1.0);
+
+        cv::Matx41d cameraPoint = CEM * lidarPoint;
+
+        cv::Matx31d pixel = CM * cv::Matx31d {cameraPoint(0, 0), cameraPoint(1, 0), cameraPoint(2, 0)};
+
+        int u = static_cast<int>(pixel(0, 0) / pixel(2, 0));
+        int v = static_cast<int>(pixel(1, 0) / pixel(2, 0));
+
+        // if (u < depthMap.rows && v < depthMap.cols) {
+        //     double camZ = cameraPoint(2, 0);
+        //     double& depthValue = depthMap.at<double>(u, v);
+        //     if (depthValue == 0 || camZ < depthValue) {
+        //         depthValue = camZ;
+        //     }
+        double camZ = cameraPoint(2, 0);
+        double& depthValue = depthMap.at<double>(u, v);
+        if (depthValue == 0 || camZ < depthValue) {
+            depthValue = camZ;
+        }
+        // std::cout << u << ' ' << v << ' ' << depthMap.at<double>(u, v) << std::endl;
+    }
+}
+
 void LvxFileHandle::clear(std::queue<XYZData> q)
 {
   std::queue<XYZData> empty;
@@ -173,9 +199,9 @@ void LvxFileHandle::SaveFrameToLvxFile(std::list<LvxBasePackDetail> &point_packe
       auto p = write_buffer_pcd.get();
       for (int i = 0; i < cur_pos_pcd / 14; i++)
       { 
-        pcd_file_ << (float)(((LivoxExtendRawPoint *)p)[i].x) / 1000000.f << " "
-                  << (float)(((LivoxExtendRawPoint *)p)[i].y) / 1000000.f << " "
-                  << (float)(((LivoxExtendRawPoint *)p)[i].z) / 1000000.f << " "
+        pcd_file_ << (float)(((LivoxExtendRawPoint *)p)[i].x) / 1000.f << " "
+                  << (float)(((LivoxExtendRawPoint *)p)[i].y) / 1000.f << " "
+                  << (float)(((LivoxExtendRawPoint *)p)[i].z) / 1000.f << " "
                   << (int)(((LivoxExtendRawPoint *)p)[i].reflectivity) << " "
                   << std::endl;
       }
@@ -203,15 +229,15 @@ void LvxFileHandle::SaveFrameToLvxFile(std::list<LvxBasePackDetail> &point_packe
   int i = 0;
   for (i = 0; i < cur_pos_pcd / 14; i++)
   {
-    pcd_file_ << (float)(((LivoxExtendRawPoint *)p)[i].x) / 1000000.f << " "
-              << (float)(((LivoxExtendRawPoint *)p)[i].y) / 1000000.f << " "
-              << (float)(((LivoxExtendRawPoint *)p)[i].z) / 1000000.f << " "
+    pcd_file_ << (float)(((LivoxExtendRawPoint *)p)[i].x) / 1000.f << " "
+              << (float)(((LivoxExtendRawPoint *)p)[i].y) / 1000.f << " "
+              << (float)(((LivoxExtendRawPoint *)p)[i].z) / 1000.f << " "
               << (int)(((LivoxExtendRawPoint *)p)[i].reflectivity) << " "
               << std::endl;
 
-    float x = (float)(((LivoxExtendRawPoint *)p)[i].x) / 1000000.f;
-    float y = (float)(((LivoxExtendRawPoint *)p)[i].y) / 1000000.f;
-    float z = (float)(((LivoxExtendRawPoint *)p)[i].z) / 1000000.f;
+    float x = (float)(((LivoxExtendRawPoint *)p)[i].x) / 1000.f;
+    float y = (float)(((LivoxExtendRawPoint *)p)[i].y) / 1000.f;
+    float z = (float)(((LivoxExtendRawPoint *)p)[i].z) / 1000.f;
 
     xyzQueue.push({x, y, z});          
   }

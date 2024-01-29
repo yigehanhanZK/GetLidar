@@ -95,6 +95,7 @@ public:
   void PrintXYZQueue();
   std::queue<XYZData> xyzQueue;
   void clear(std::queue<XYZData> q);
+  void projectPointCloudToDepthMap(const std::vector<XYZData>& pointCloud, cv::Mat& depthMap, cv::Matx<double, 4, 4>& CEM, cv::Matx<double, 3, 3>& CM);
 
   void AddDeviceInfo(LvxDeviceInfo &info) { device_info_list_.push_back(info); };
   int GetDeviceInfoListSize() { return device_info_list_.size(); }
