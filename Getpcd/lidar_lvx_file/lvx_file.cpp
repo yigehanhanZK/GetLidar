@@ -347,3 +347,4 @@ void ParseExtrinsicXml(DeviceItem &item, LvxDeviceInfo &info)
     }
   }
 }
+
