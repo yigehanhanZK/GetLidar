@@ -140,18 +140,18 @@ void LvxFileHandle::projectPointCloudToDepthMap(const std::vector<XYZData>& poin
         int u = static_cast<int>(pixel(0, 0) / pixel(2, 0));
         int v = static_cast<int>(pixel(1, 0) / pixel(2, 0));
 
-        // if (u < depthMap.rows && v < depthMap.cols) {
-        //     double camZ = cameraPoint(2, 0);
-        //     double& depthValue = depthMap.at<double>(u, v);
-        //     if (depthValue == 0 || camZ < depthValue) {
-        //         depthValue = camZ;
-        //     }
         double camZ = cameraPoint(2, 0);
-        double& depthValue = depthMap.at<double>(u, v);
-        if (depthValue == 0 || camZ < depthValue) {
-            depthValue = camZ;
+
+        if (u <= 0 || v <= 0 || u >= 3088 || v >= 2064) {
+          continue;
         }
-        // std::cout << u << ' ' << v << ' ' << depthMap.at<double>(u, v) << std::endl;
+        if (camZ < 0) {
+          continue;
+        }
+
+        depthMap.at<double>(u, v) = camZ;
+
+        std::cout << u << ' ' << v << ' ' << depthMap.at<double>(u, v) << std::endl;
     }
 }
 

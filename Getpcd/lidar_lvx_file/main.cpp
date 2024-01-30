@@ -374,18 +374,18 @@ int main(int argc, const char *argv[]) {
     printf("Finish save %d frame to lvx file.\n", i);
     lvx_file_handler.SaveFrameToLvxFile(point_packet_list_temp);
 
-    while((i+1) % 400 == 0){
+    while ((i+1) % 400 == 0) {
       while (!lvx_file_handler.xyzQueue.empty()) {
         XYZData point = lvx_file_handler.xyzQueue.front();
         lvx_file_handler.xyzQueue.pop();
         pointCloud.push_back(point);
       }
-    lvx_file_handler.projectPointCloudToDepthMap(pointCloud, depthMap, CEM, CM);
-    cv::namedWindow("Depth Map", cv::WINDOW_NORMAL);
-    cv::resizeWindow("Depth Map", 1500, 1200);
-    cv::imshow("Depth Map", depthMap);
-    cv::waitKey(1);
-    // break;
+      lvx_file_handler.projectPointCloudToDepthMap(pointCloud, depthMap, CEM, CM);
+      cv::namedWindow("Depth Map", cv::WINDOW_NORMAL);
+      cv::resizeWindow("Depth Map", 1200, 800);
+      cv::imshow("Depth Map", depthMap);
+      cv::waitKey(1);
+      // break;
     }
   }
 
