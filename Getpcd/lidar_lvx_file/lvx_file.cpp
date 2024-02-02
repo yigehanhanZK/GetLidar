@@ -133,11 +133,6 @@ void LvxFileHandle::projectPointCloudToDepthMap(const std::vector<XYZData>& poin
     for (const XYZData& point : pointCloud) {
         cv::Matx41d lidarPoint(point.x, point.y, point.z, 1.0);
 
-        // 近距离点云滤除
-        if ((std::pow(point.z, 2) + std::pow(point.y, 2) + std::pow(point.x, 2)) < 0.4 ^ 2) {
-          continue;
-        }
-
         cv::Matx41d cameraPoint = CEM * lidarPoint;
 
         cv::Matx31d pixel = CM * cv::Matx31d {cameraPoint(0, 0), cameraPoint(1, 0), cameraPoint(2, 0)};
